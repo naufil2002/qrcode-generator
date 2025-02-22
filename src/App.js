@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { QRCodeCanvas } from "qrcode.react";
-import "./index.css"; // Import the CSS file
+import "./index.css";
 
 function App() {
   const [formData, setFormData] = useState({
@@ -20,7 +20,6 @@ function App() {
     if (name === "name" && /[^a-zA-Z\s]/.test(value)) return;
     if (name === "phone" && /[^0-9]/.test(value)) return;
     if (name === "phone" && value.length > 10) return;
-
     setFormData({ ...formData, [name]: value });
   };
 
@@ -28,15 +27,10 @@ function App() {
     if (!formData.name || !formData.email || !formData.phone || !formData.address || !formData.item) {
       return setError("All fields are required!");
     }
-
     setError("");
-
     const message = `Hello, I found an item!\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nAddress: ${formData.address}\nItem: ${formData.item}\n\n"${formData.message}"`;
-
     const whatsappLink = `https://wa.me/9834070695?text=${encodeURIComponent(message)}`;
-
     setQrCode(whatsappLink);
-
     setFormData({
       name: "",
       email: "",
@@ -59,18 +53,26 @@ function App() {
   };
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Lost Item QR Code",
-          text: "Scan this QR to get the owner's details and contact them via WhatsApp or call!",
-          url: qrCode,
+    if (qrRef.current) {
+      const canvas = qrRef.current.querySelector("canvas");
+      if (canvas) {
+        canvas.toBlob(async (blob) => {
+          const file = new File([blob], "qr-code.png", { type: "image/png" });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+              await navigator.share({
+                title: "Lost Item QR Code",
+                text: "Scan this QR to get the owner's details and contact them via WhatsApp or call!",
+                files: [file],
+              });
+            } catch (error) {
+              console.log("Error sharing:", error);
+            }
+          } else {
+            alert("Sharing not supported on this device.");
+          }
         });
-      } catch (error) {
-        console.log("Error sharing:", error);
       }
-    } else {
-      alert("Sharing not supported on this device.");
     }
   };
 
