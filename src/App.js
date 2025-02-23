@@ -43,12 +43,24 @@ function App() {
 
   const handlePrint = () => {
     if (qrRef.current) {
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write("<html><head><title>Print QR Code</title></head><body>");
-      printWindow.document.write(qrRef.current.outerHTML);
-      printWindow.document.write("</body></html>");
-      printWindow.document.close();
-      printWindow.print();
+      const canvas = qrRef.current.querySelector("canvas");
+      if (canvas) {
+        const imgData = canvas.toDataURL("image/png");
+        const printWindow = window.open("", "_blank");
+        printWindow.document.write(`
+          <html>
+            <head><title>Print QR Code</title></head>
+            <body style="text-align: center;">
+              <img src="${imgData}" alt="QR Code" />
+              <p style="font-size: 16px; font-weight: bold;">Scan this QR code to get the owner's details and contact them via WhatsApp or call.</p>
+              <script>
+                window.onload = function() { window.print(); }
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
     }
   };
 
@@ -62,7 +74,7 @@ function App() {
             try {
               await navigator.share({
                 title: "Lost Item QR Code",
-                text: "Scan this QR to get the owner's details and contact them via WhatsApp or call!",
+                text: "Here is the QR code to contact the owner.",
                 files: [file],
               });
             } catch (error) {
@@ -107,7 +119,9 @@ function App() {
           <div ref={qrRef}>
             <QRCodeCanvas value={qrCode} size={200} />
           </div>
-          <p>Scan this QR code to get the owner's details and contact them via WhatsApp or call.</p>
+          <p style={{ fontSize: "16px", fontWeight: "bold" }}>
+            Scan this QR code to get the owner's details and contact them via WhatsApp or call.
+          </p>
           <div className="btn-group">
             <button onClick={handlePrint} className="print">Print QR Code</button>
             <button onClick={handleShare} className="share">Share QR Code</button>
