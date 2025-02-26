@@ -29,7 +29,7 @@ function App() {
     }
     setError("");
     const message = `Hello, I found an item!\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nAddress: ${formData.address}\nItem: ${formData.item}\n\n"${formData.message}"`;
-    const whatsappLink = `https://wa.me/9834070695?text=${encodeURIComponent(message)}`;
+    const whatsappLink = `https://wa.me/${formData.phone}?text=${encodeURIComponent(message)}`;
     setQrCode(whatsappLink);
     setFormData({
       name: "",
